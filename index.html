@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Formulario CV</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+:root{--c:#f2ede4;--c2:#e8e0d0;--n:#162040;--n2:#243060;--o:#b8783a;--o2:#d4956a;--t:#1a1a2e;--tm:#6b6b7e;--w:#fff;--e:#c0392b;--b:#d5cfc4;--g:#27ae60;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--c);color:var(--t);font-size:15px;line-height:1.6;}
+
+/* HEADER */
+.hdr{background:var(--n);color:#fff;padding:16px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.25);}
+.hdr-logo{width:36px;height:36px;background:var(--o);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#fff;flex-shrink:0;}
+.hdr-txt h1{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;}
+.hdr-txt p{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;}
+
+/* PROGRESS BAR */
+.prog-wrap{background:var(--n);padding:0 24px 14px;}
+.prog-steps{display:flex;max-width:840px;margin:0 auto;gap:4px;}
+.pi{flex:1;text-align:center;position:relative;}
+.pn{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.4);font-size:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;transition:all .3s;font-weight:600;}
+.pi.act .pn{background:var(--o);color:#fff;}
+.pi.dn .pn{background:var(--g);color:#fff;}
+.pl{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.3);transition:color .3s;}
+.pi.act .pl{color:#fff;}
+.pi.dn .pl{color:rgba(255,255,255,.5);}
+.pi::after{content:'';position:absolute;bottom:-8px;left:50%;right:-50%;height:2px;background:rgba(255,255,255,.1);z-index:0;}
+.pi:last-child::after{display:none;}
+.pi.dn::after{background:var(--g);}
+.pi.act::after{background:var(--o);}
+
+/* PERCENT BAR */
+.pct-bar-wrap{background:var(--n2);padding:8px 24px;}
+.pct-bar-inner{max-width:840px;margin:0 auto;display:flex;align-items:center;gap:10px;}
+.pct-track{flex:1;height:6px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden;}
+.pct-fill{height:100%;background:linear-gradient(90deg,var(--o),var(--o2));border-radius:3px;transition:width .5s ease;}
+.pct-txt{font-size:11px;color:rgba(255,255,255,.7);font-weight:500;min-width:36px;text-align:right;}
+
+/* MAIN */
+.wrap{max-width:840px;margin:0 auto;padding:24px 14px 60px;}
+.step{display:none;animation:fu .35s ease both;}
+.step.act{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARD */
+.card{background:#fff;border-radius:14px;padding:26px 28px;box-shadow:0 4px 20px rgba(22,32,64,.08);margin-bottom:16px;}
+.ct{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--n);margin-bottom:4px;display:flex;align-items:center;gap:10px;}
+.ct .ic{width:32px;height:32px;background:var(--c);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.cs{font-size:13px;color:var(--tm);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--c2);}
+
+/* FORM */
+.row{display:flex;gap:14px;margin-bottom:14px;}
+.row .fg{flex:1;min-width:0;}
+.fg{margin-bottom:14px;}
+.fg:last-child{margin-bottom:0;}
+label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--n2);margin-bottom:5px;}
+label .rq{color:var(--o);margin-left:2px;}
+label .op{color:var(--tm);font-weight:400;text-transform:none;letter-spacing:0;margin-left:3px;font-size:11px;}
+input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select{width:100%;padding:11px 13px;border:1.5px solid var(--b);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--t);background:#fff;outline:none;appearance:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--o);box-shadow:0 0 0 3px rgba(184,120,58,.1);}
+input.er,textarea.er,select.er{border-color:var(--e);}
+textarea{resize:vertical;min-height:82px;}
+.em{font-size:11px;color:var(--e);margin-top:3px;display:none;}
+.em.show{display:block;}
+
+/* RADIO */
+.rg{display:flex;gap:8px;flex-wrap:wrap;}
+.ro{position:relative;}
+.ro input[type=radio]{position:absolute;opacity:0;pointer-events:none;}
+.ro label{display:flex;align-items:center;gap:6px;padding:9px 16px;border:1.5px solid var(--b);border-radius:22px;cursor:pointer;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--tm);background:var(--c);transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.ro label::before{content:'';width:11px;height:11px;border-radius:50%;border:2px solid var(--b);background:#fff;transition:all .2s;flex-shrink:0;}
+.ro input:checked+label{border-color:var(--o);color:var(--n);background:rgba(184,120,58,.06);}
+.ro input:checked+label::before{border-color:var(--o);background:var(--o);}
+
+/* CONDITIONAL */
+.cb{overflow:hidden;max-height:0;opacity:0;transition:max-height .4s,opacity .3s,padding .3s,margin .3s;background:var(--c);border-radius:10px;padding:0 14px;border:1.5px solid transparent;}
+.cb.show{max-height:1200px;opacity:1;padding:14px;margin-top:10px;border-color:var(--c2);}
+
+/* JOB BLOCK */
+.jb{border:1.5px solid var(--b);border-radius:10px;padding:18px;margin-bottom:14px;background:var(--c);}
+.jt{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--n);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.tg{font-size:9px;text-transform:uppercase;padding:2px 7px;border-radius:16px;font-family:'DM Sans',sans-serif;font-weight:500;}
+.tgr{background:var(--o);color:#fff;}
+.tgo{background:var(--tm);color:#fff;}
+
+/* PHOTO */
+.pa{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+.pc{width:90px;height:90px;border-radius:50%;border:3px dashed var(--b);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--c);}
+.pc.hp{border-style:solid;border-color:var(--o);}
+.pc img{width:100%;height:100%;object-fit:cover;}
+.pph{text-align:center;color:var(--tm);font-size:11px;}
+.pph .big{font-size:22px;display:block;margin-bottom:2px;}
+.pi2{flex:1;min-width:150px;}
+input[type=file]{display:none;}
+.ub{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;background:var(--n);color:#fff;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:background .2s;-webkit-tap-highlight-color:transparent;}
+.ub:hover,.ub:active{background:var(--n2);}
+.fi{font-size:11px;color:var(--tm);margin-top:5px;}
+.fn{font-size:12px;color:var(--n);font-weight:500;margin-top:3px;}
+.nb{background:rgba(184,120,58,.08);border-left:3px solid var(--o);border-radius:0 7px 7px 0;padding:9px 12px;font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.6;}
+.dv{border:none;border-top:1px solid var(--c2);margin:18px 0;}
+.nr{display:flex;justify-content:space-between;align-items:center;margin-top:5px;gap:10px;}
+.nr .btn{flex:1;max-width:220px;justify-content:center;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:12px 22px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .2s;-webkit-tap-highlight-color:transparent;text-align:center;justify-content:center;}
+.bp{background:var(--o);color:#fff;box-shadow:0 3px 12px rgba(184,120,58,.25);}
+.bp:hover,.bp:active{background:var(--o2);}
+.bs{background:transparent;color:var(--n);border:1.5px solid var(--b);}
+.bs:hover,.bs:active{background:var(--c2);}
+.bsub{background:var(--n);color:#fff;box-shadow:0 3px 14px rgba(22,32,64,.2);font-size:15px;padding:13px 28px;}
+.bsub:hover,.bsub:active{background:var(--n2);}
+.sw{position:relative;}
+.sw::after{content:'&#9660;';position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--tm);pointer-events:none;font-size:11px;}
+.sw select{padding-right:30px;}
+
+/* TEMPLATE GRID */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;}
+.tbtn{background:#fff;border:2.5px solid var(--b);border-radius:11px;padding:0;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s;overflow:hidden;text-align:center;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;}
+.tbtn:active{transform:scale(.97);}
+.tbtn.sel{border-color:var(--o);box-shadow:0 0 0 3px rgba(184,120,58,.15);background:#fffaf4;}
+.timg{width:100%;flex:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:120px;}
+.timg svg{width:100%;height:100%;display:block;}
+.tlbl{padding:6px 8px 2px;font-size:12px;font-weight:600;color:var(--n);}
+.tbtn.sel .tlbl{color:var(--o);}
+.tprev-btn{margin:0 8px 8px;padding:6px 10px;background:var(--n);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;width:calc(100% - 16px);-webkit-tap-highlight-color:transparent;transition:background .2s;}
+.tprev-btn:hover,.tprev-btn:active{background:var(--n2);}
+
+/* PREVIEW MODAL */
+.prev-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s;}
+.prev-ov.show{opacity:1;pointer-events:auto;}
+.prev-box{background:#fff;border-radius:14px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.3);transform:translateY(16px);transition:transform .3s;}
+.prev-ov.show .prev-box{transform:translateY(0);}
+.prev-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--c2);position:sticky;top:0;background:#fff;z-index:1;border-radius:14px 14px 0 0;}
+.prev-hdr h3{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--n);}
+.prev-close{background:var(--c);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+.prev-body{padding:20px;}
+.prev-body svg{width:100%;height:auto;display:block;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.1);}
+.prev-desc{margin-top:14px;font-size:13px;color:var(--tm);line-height:1.6;}
+.prev-sel-btn{display:block;width:100%;margin-top:14px;padding:12px;background:var(--o);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(22,32,64,.6);backdrop-filter:blur(3px);z-index:3000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s;}
+.mov.show{opacity:1;pointer-events:auto;}
+.modal{background:#fff;border-radius:14px;padding:34px 26px;max-width:400px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(22,32,64,.16);transform:translateY(16px);transition:transform .3s;}
+.mov.show .modal{transform:translateY(0);}
+.mic{font-size:44px;margin-bottom:12px;}
+.mtt{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--n);margin-bottom:8px;}
+.mbd{font-size:13px;color:var(--tm);line-height:1.7;margin-bottom:20px;}
+
+/* LOADING */
+#lov{position:fixed;inset:0;background:rgba(22,32,64,.83);z-index:4000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;opacity:0;pointer-events:none;transition:opacity .3s;}
+#lov.show{opacity:1;pointer-events:auto;}
+.spin{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--o);border-radius:50%;animation:sp .8s linear infinite;margin-bottom:14px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* MOBILE */
+@media(max-width:600px){
+  .hdr{padding:13px 14px;}
+  .hdr-txt h1{font-size:16px;}
+  .hdr-txt p{display:none;}
+  .prog-wrap,.pct-bar-wrap{padding-left:14px;padding-right:14px;}
+  .pl{display:none;}
+  .wrap{padding:16px 10px 60px;}
+  .card{padding:18px 16px;}
+  .ct{font-size:20px;}
+  .row{flex-direction:column;gap:0;}
+  .tgrid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .timg{min-height:100px;}
+  .nr{flex-wrap:wrap;}
+  .nr .btn{max-width:100%;}
+  input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select{font-size:16px;padding:12px 13px;}
+  .btn{padding:13px 18px;font-size:14px;}
+  .bsub{padding:14px 20px;}
+  .modal{padding:28px 18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="lov"><div class="spin"></div><p id="ltxt" style="font-size:14px;opacity:.8">Enviando...</p></div>
+
+<!-- MODAL OK -->
+<div class="mov" id="mok">
+  <div class="modal">
+    <div class="mic">&#x2705;</div>
+    <h2 class="mtt">&#x00A1;Formulario Enviado!</h2>
+    <p class="mbd">Tu informaci&oacute;n fue recibida correctamente.<br>Nos comunicaremos a la brevedad.</p>
+    <button class="btn bsub" style="width:100%" onclick="closeM('mok')">Aceptar</button>
+  </div>
+</div>
+
+<!-- MODAL ERROR -->
+<div class="mov" id="merr">
+  <div class="modal">
+    <div class="mic">&#x26A0;&#xFE0F;</div>
+    <h2 class="mtt">Error al Enviar</h2>
+    <p class="mbd" id="errtxt">No se pudo enviar. Intent&aacute; de nuevo.</p>
+    <button class="btn bsub" style="width:100%" onclick="closeM('merr')">Cerrar</button>
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="prev-ov" id="prevOv">
+  <div class="prev-box">
+    <div class="prev-hdr">
+      <h3 id="prevTitle">Vista previa</h3>
+      <button class="prev-close" onclick="closePrev()">&#x2715;</button>
+    </div>
+    <div class="prev-body">
+      <div id="prevSvg"></div>
+      <p class="prev-desc" id="prevDesc"></p>
+      <button class="prev-sel-btn" id="prevSelBtn">&#x2713; Elegir este modelo</button>
+    </div>
+  </div>
+</div>
+
+<header class="hdr">
+  <div class="hdr-logo">CV</div>
+  <div class="hdr-txt"><h1>Formulario de Curriculum Vitae</h1><p>Complet&aacute; el formulario &mdash; recibiremos tu CV autom&aacute;ticamente</p></div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-steps">
+    <div class="pi act" id="pg0"><div class="pn">&#9733;</div><div class="pl">Modelo</div></div>
+    <div class="pi" id="pg1"><div class="pn">1</div><div class="pl">Personales</div></div>
+    <div class="pi" id="pg2"><div class="pn">2</div><div class="pl">Experiencia</div></div>
+    <div class="pi" id="pg3"><div class="pn">3</div><div class="pl">Educaci&oacute;n</div></div>
+    <div class="pi" id="pg4"><div class="pn">4</div><div class="pl">Sobre Vos</div></div>
+  </div>
+</div>
+<div class="pct-bar-wrap">
+  <div class="pct-bar-inner">
+    <div class="pct-track"><div class="pct-fill" id="pctFill" style="width:0%"></div></div>
+    <div class="pct-txt" id="pctTxt">0%</div>
+  </div>
+</div>
+
+<main class="wrap">
+
+<!-- PASO 0 -->
+<div class="step act" id="s0">
+  <div class="card">
+    <h2 class="ct"><span class="ic">&#x1F3A8;</span>Eleg&iacute; tu modelo de CV</h2>
+    <p class="cs">Seleccion&aacute; el dise&ntilde;o que m&aacute;s te guste &mdash; tap en &#x1F441; para ver en detalle</p>
+    <div class="tgrid">
+      <div style="display:flex;flex-direction:column;">
+        <button type="button" class="tbtn sel" id="tb1">
+          <div class="timg"><svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="140" fill="white"/><rect width="100" height="22" fill="#f0f0f0"/><rect x="6" y="6" width="35" height="4" fill="#222" rx="1"/><rect x="6" y="13" width="22" height="2.5" fill="#aaa" rx="1"/><rect x="62" y="6" width="28" height="2" fill="#bbb" rx="1"/><rect x="62" y="10" width="28" height="2" fill="#bbb" rx="1"/><rect x="62" y="14" width="28" height="2" fill="#bbb" rx="1"/><line x1="0" y1="24" x2="100" y2="24" stroke="#ddd" stroke-width="0.5"/><rect x="6" y="30" width="16" height="2.5" fill="#222" rx="1"/><line x1="27" y1="27" x2="27" y2="100" stroke="#ccc" stroke-width="0.5"/><rect x="30" y="30" width="60" height="2" fill="#ccc" rx="1"/><rect x="30" y="34" width="55" height="2" fill="#ccc" rx="1"/><rect x="30" y="38" width="50" height="2" fill="#ccc" rx="1"/><rect x="6" y="48" width="16" height="2.5" fill="#222" rx="1"/><rect x="30" y="48" width="30" height="2" fill="#ccc" rx="1"/><rect x="30" y="52" width="25" height="2" fill="#ccc" rx="1"/><rect x="30" y="56" width="28" height="2" fill="#ccc" rx="1"/><rect x="6" y="66" width="18" height="2.5" fill="#222" rx="1"/><rect x="30" y="66" width="40" height="2.5" fill="#333" rx="1"/><rect x="30" y="71" width="25" height="2" fill="#aaa" rx="1"/><rect x="30" y="79" width="38" height="2.5" fill="#333" rx="1"/><rect x="30" y="84" width="25" height="2" fill="#aaa" rx="1"/><rect x="6" y="96" width="18" height="2.5" fill="#222" rx="1"/><rect x="30" y="96" width="35" height="2.5" fill="#333" rx="1"/><rect x="30" y="101" width="28" height="2" fill="#aaa" rx="1"/></svg></div>
+          <div class="tlbl">Modelo 1</div>
+        </button>
+        <button type="button" class="tprev-btn" onclick="openPrev(1)">&#x1F441; Ver modelo</button>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <button type="button" class="tbtn" id="tb2">
+          <div class="timg"><svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="140" fill="white"/><rect width="38" height="140" fill="#222"/><circle cx="19" cy="18" r="12" fill="#555"/><rect x="5" y="34" width="28" height="2" fill="#777" rx="1"/><rect x="5" y="38" width="22" height="1.5" fill="#999" rx="1"/><rect x="5" y="42" width="25" height="1.5" fill="#999" rx="1"/><rect x="5" y="49" width="15" height="2" fill="#888" rx="1"/><rect x="5" y="53" width="26" height="1.5" fill="#777" rx="1"/><rect x="5" y="57" width="22" height="1.5" fill="#777" rx="1"/><rect x="44" y="8" width="48" height="5" fill="#333" rx="1"/><rect x="44" y="15" width="30" height="2.5" fill="#bbb" rx="1"/><line x1="44" y1="22" x2="95" y2="22" stroke="#ccc" stroke-width="0.5"/><rect x="44" y="26" width="30" height="2.5" fill="#444" rx="1"/><rect x="44" y="31" width="48" height="1.5" fill="#ccc" rx="1"/><rect x="44" y="35" width="40" height="1.5" fill="#ccc" rx="1"/><rect x="44" y="41" width="48" height="1.5" fill="#ccc" rx="1"/><rect x="44" y="45" width="36" height="1.5" fill="#ccc" rx="1"/><rect x="44" y="53" width="30" height="2.5" fill="#444" rx="1"/><rect x="44" y="58" width="48" height="1.5" fill="#ccc" rx="1"/><rect x="44" y="62" width="40" height="1.5" fill="#ccc" rx="1"/></svg></div>
+          <div class="tlbl">Modelo 2</div>
+        </button>
+        <button type="button" class="tprev-btn" onclick="openPrev(2)">&#x1F441; Ver modelo</button>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <button type="button" class="tbtn" id="tb3">
+          <div class="timg"><svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="140" fill="white"/><rect width="36" height="118" fill="#ddd"/><ellipse cx="18" cy="118" rx="18" ry="8" fill="#ddd"/><circle cx="18" cy="16" r="12" fill="#bbb"/><rect x="5" y="32" width="26" height="2" fill="#888" rx="1"/><rect x="5" y="36" width="22" height="1.5" fill="#aaa" rx="1"/><rect x="5" y="50" width="18" height="2" fill="#888" rx="1"/><rect x="5" y="54" width="24" height="1.5" fill="#aaa" rx="1"/><rect x="5" y="58" width="20" height="1.5" fill="#aaa" rx="1"/><rect x="40" y="8" width="52" height="7" fill="#333" rx="1"/><rect x="40" y="17" width="35" height="2.5" fill="#bbb" rx="1"/><rect x="40" y="24" width="52" height="5" rx="2.5" fill="#ffd0c0"/><rect x="42" y="33" width="48" height="1.5" fill="#ccc" rx="1"/><rect x="42" y="37" width="40" height="1.5" fill="#ccc" rx="1"/><rect x="40" y="44" width="52" height="5" rx="2.5" fill="#ffd0c0"/><rect x="42" y="53" width="40" height="2.5" fill="#555" rx="1"/><rect x="42" y="57" width="48" height="1.5" fill="#ccc" rx="1"/><rect x="40" y="65" width="52" height="5" rx="2.5" fill="#ffd0c0"/><rect x="42" y="74" width="35" height="2" fill="#555" rx="1"/><rect x="42" y="78" width="28" height="1.5" fill="#ccc" rx="1"/></svg></div>
+          <div class="tlbl">Modelo 3</div>
+        </button>
+        <button type="button" class="tprev-btn" onclick="openPrev(3)">&#x1F441; Ver modelo</button>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <button type="button" class="tbtn" id="tb4">
+          <div class="timg"><svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="140" fill="white"/><rect width="100" height="30" fill="#eee"/><rect x="6" y="5" width="20" height="20" fill="#bbb"/><rect x="30" y="8" width="40" height="5" fill="#333" rx="1"/><rect x="30" y="15" width="28" height="2.5" fill="#aaa" rx="1"/><rect x="6" y="34" width="22" height="2" fill="#333" rx="1"/><line x1="6" y1="37" x2="94" y2="37" stroke="#ccc" stroke-width="0.5"/><rect x="6" y="40" width="70" height="1.5" fill="#bbb" rx="1"/><rect x="6" y="44" width="60" height="1.5" fill="#bbb" rx="1"/><rect x="6" y="50" width="20" height="2" fill="#333" rx="1"/><line x1="6" y1="53" x2="44" y2="53" stroke="#ccc" stroke-width="0.4"/><rect x="6" y="56" width="35" height="1.5" fill="#ccc" rx="1"/><rect x="6" y="60" width="30" height="1.5" fill="#ccc" rx="1"/><rect x="6" y="68" width="18" height="2" fill="#333" rx="1"/><line x1="6" y1="71" x2="44" y2="71" stroke="#ccc" stroke-width="0.4"/><rect x="6" y="74" width="32" height="1.5" fill="#ccc" rx="1"/><rect x="50" y="50" width="40" height="2" fill="#333" rx="1"/><line x1="50" y1="53" x2="94" y2="53" stroke="#ccc" stroke-width="0.4"/><rect x="50" y="56" width="35" height="2" fill="#555" rx="1"/><rect x="50" y="60" width="40" height="1.5" fill="#ccc" rx="1"/><rect x="50" y="70" width="35" height="2" fill="#555" rx="1"/><rect x="50" y="74" width="40" height="1.5" fill="#ccc" rx="1"/></svg></div>
+          <div class="tlbl">Modelo 4</div>
+        </button>
+        <button type="button" class="tprev-btn" onclick="openPrev(4)">&#x1F441; Ver modelo</button>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <button type="button" class="tbtn" id="tb5">
+          <div class="timg"><svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="140" fill="white"/><circle cx="18" cy="18" r="13" fill="#ddd"/><rect x="36" y="8" width="55" height="6" fill="#333" rx="1"/><rect x="36" y="16" width="40" height="2.5" fill="#bbb" rx="1"/><rect x="36" y="21" width="50" height="1.5" fill="#ddd" rx="1"/><rect x="36" y="25" width="45" height="1.5" fill="#ddd" rx="1"/><line x1="6" y1="37" x2="94" y2="37" stroke="#ccc" stroke-width="0.5"/><rect x="6" y="42" width="12" height="1.5" fill="#bbb" rx="1"/><line x1="6" y1="45" x2="40" y2="45" stroke="#ddd" stroke-width="0.3"/><rect x="6" y="48" width="32" height="1.5" fill="#ccc" rx="1"/><rect x="6" y="52" width="28" height="1.5" fill="#ccc" rx="1"/><rect x="6" y="59" width="12" height="1.5" fill="#bbb" rx="1"/><line x1="6" y1="62" x2="40" y2="62" stroke="#ddd" stroke-width="0.3"/><rect x="6" y="65" width="30" height="1.5" fill="#ccc" rx="1"/><rect x="48" y="42" width="42" height="2.5" fill="#333" rx="1"/><line x1="48" y1="46" x2="94" y2="46" stroke="#ccc" stroke-width="0.4"/><rect x="48" y="49" width="38" height="2" fill="#555" rx="1"/><rect x="48" y="53" width="30" height="1.5" fill="#bbb" rx="1"/><rect x="48" y="61" width="38" height="2" fill="#555" rx="1"/><rect x="48" y="65" width="30" height="1.5" fill="#bbb" rx="1"/><rect x="48" y="73" width="38" height="2" fill="#555" rx="1"/><rect x="48" y="77" width="30" height="1.5" fill="#bbb" rx="1"/></svg></div>
+          <div class="tlbl">Modelo 5</div>
+        </button>
+        <button type="button" class="tprev-btn" onclick="openPrev(5)">&#x1F441; Ver modelo</button>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <button type="button" class="tbtn" id="tb6">
+          <div class="timg"><svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="140" fill="#faf8f4"/><rect width="38" height="140" fill="#221f1a"/><rect x="5" y="6" width="28" height="28" fill="#555"/><rect x="5" y="40" width="28" height="2" fill="#998" rx="1"/><rect x="5" y="44" width="24" height="1.5" fill="#776" rx="1"/><rect x="5" y="48" width="20" height="1.5" fill="#776" rx="1"/><rect x="5" y="55" width="22" height="2" fill="#998" rx="1"/><rect x="5" y="59" width="26" height="1.5" fill="#776" rx="1"/><rect x="5" y="63" width="24" height="1.5" fill="#776" rx="1"/><rect x="44" y="8" width="50" height="7" fill="#333" rx="1"/><rect x="44" y="17" width="35" height="2.5" fill="#888" rx="1"/><rect x="44" y="27" width="38" height="2" fill="#555" rx="1"/><line x1="44" y1="30" x2="94" y2="30" stroke="#bbb" stroke-width="0.4"/><rect x="44" y="33" width="48" height="1.5" fill="#bbb" rx="1"/><rect x="44" y="37" width="40" height="1.5" fill="#bbb" rx="1"/><rect x="44" y="44" width="38" height="2" fill="#555" rx="1"/><line x1="44" y1="47" x2="94" y2="47" stroke="#bbb" stroke-width="0.4"/><rect x="44" y="50" width="35" height="1.5" fill="#bbb" rx="1"/><rect x="44" y="54" width="28" height="1.5" fill="#bbb" rx="1"/><rect x="44" y="62" width="38" height="2" fill="#555" rx="1"/><line x1="44" y1="65" x2="94" y2="65" stroke="#bbb" stroke-width="0.4"/><rect x="44" y="68" width="30" height="1.5" fill="#bbb" rx="1"/></svg></div>
+          <div class="tlbl">Modelo 6</div>
+        </button>
+        <button type="button" class="tprev-btn" onclick="openPrev(6)">&#x1F441; Ver modelo</button>
+      </div>
+    </div>
+  </div>
+  <div class="nr"><span></span><button class="btn bp" onclick="goStep(1)">Siguiente &rarr; Datos Personales</button></div>
+</div>
+
+<!-- PASO 1 -->
+<div class="step" id="s1">
+  <div class="card">
+    <h2 class="ct"><span class="ic">&#x1F464;</span>Datos Personales</h2>
+    <p class="cs">Informaci&oacute;n de contacto e identificaci&oacute;n</p>
+    <div class="row">
+      <div class="fg"><label>Nombre y Apellido <span class="rq">*</span></label><input type="text" id="nombre" placeholder="Ej: Mar&iacute;a Gonz&aacute;lez"><p class="em" id="e-nombre">Ingres&aacute; tu nombre.</p></div>
+      <div class="fg"><label>Email <span class="rq">*</span></label><input type="email" id="email" placeholder="ejemplo@correo.com"><p class="em" id="e-email">Email inv&aacute;lido.</p></div>
+    </div>
+    <div class="row">
+      <div class="fg"><label>Tel&eacute;fono <span class="rq">*</span></label><input type="tel" id="tel" placeholder="+54 351 4567890"><p class="em" id="e-tel">Ingres&aacute; tu tel&eacute;fono.</p></div>
+      <div class="fg"><label>Barrio y Ciudad <span class="rq">*</span></label><input type="text" id="dir" placeholder="Ej: Villa Belgrano, C&oacute;rdoba"><p class="em" id="e-dir">Ingres&aacute; tu direcci&oacute;n.</p></div>
+    </div>
+    <div class="fg"><label>Puestos de inter&eacute;s <span class="rq">*</span></label><textarea id="puestos" rows="2" placeholder="Ej: Administrativo, Atenci&oacute;n al cliente..."></textarea><p class="em" id="e-puestos">Indic&aacute; los puestos.</p></div>
+    <div class="row">
+      <div class="fg"><label>Ocupaci&oacute;n <span class="op">(opcional)</span></label><input type="text" id="ocup" placeholder="Ej: Estudiante, Comerciante"></div>
+      <div class="fg"><label>Disponibilidad horaria <span class="op">(opcional)</span></label><div class="sw"><select id="disponib"><option value="">-- Seleccion&aacute; --</option><option>Tiempo completo</option><option>Medio tiempo</option><option>Part-time (ma&ntilde;ana)</option><option>Part-time (tarde)</option><option>Part-time (noche)</option><option>Fines de semana</option><option>Flexible</option></select></div></div>
+    </div>
+    <div class="fg"><label>LinkedIn <span class="op">(opcional)</span></label><input type="url" id="linkedin" placeholder="https://linkedin.com/in/tu-perfil"></div>
+    <hr class="dv">
+    <div class="fg">
+      <label>Foto de Rostro <span class="rq">*</span></label>
+      <div class="nb">&#x1F4F7; Rostro visible &middot; fondo neutro &middot; torso cubierto &middot; foto actual &middot; m&aacute;x. 10 MB</div>
+      <div class="pa">
+        <div class="pc" id="pwrap"><div class="pph"><span class="big">&#x1F4F7;</span>Sin foto</div></div>
+        <div class="pi2">
+          <button type="button" class="ub" onclick="document.getElementById('fotoi').click()">&#x1F4CE; Seleccionar foto</button>
+          <input type="file" id="fotoi" accept="image/*" onchange="handlePhoto(this)">
+          <p class="fi">JPG, PNG o WEBP &middot; M&aacute;x. 10 MB</p>
+          <p class="fn" id="fotonm">Ninguna foto seleccionada</p>
+        </div>
+      </div>
+      <p class="em" id="e-foto">La foto es obligatoria.</p>
+    </div>
+  </div>
+  <div class="nr"><button class="btn bs" onclick="goStep(0)">&larr; Modelo</button><button class="btn bp" onclick="goStep(2)">Siguiente &rarr; Experiencia</button></div>
+</div>
+
+<!-- PASO 2 -->
+<div class="step" id="s2">
+  <div class="card">
+    <h2 class="ct"><span class="ic">&#x1F4BC;</span>Experiencia Laboral</h2>
+    <p class="cs">Trabajo actual y experiencia previa</p>
+    <div class="fg">
+      <label>&iquest;Trabaj&aacute;s actualmente? <span class="rq">*</span></label>
+      <div class="rg">
+        <div class="ro"><input type="radio" name="trabaja" id="trsi" value="si" onchange="toggleCB('trsi','ctrab')"><label for="trsi">S&iacute;</label></div>
+        <div class="ro"><input type="radio" name="trabaja" id="trno" value="no" onchange="toggleCB('trsi','ctrab')"><label for="trno">No</label></div>
+      </div>
+      <p class="em" id="e-trab">Seleccion&aacute; una opci&oacute;n.</p>
+    </div>
+    <div class="cb" id="ctrab">
+      <div class="fg"><label>&iquest;D&oacute;nde trabajas? <span class="rq">*</span></label><input type="text" id="tjd" placeholder="Nombre de la empresa"><p class="em" id="e-tjd">Requerido.</p></div>
+      <div class="row">
+        <div class="fg"><label>Desde cu&aacute;ndo <span class="rq">*</span></label><input type="text" id="tjde" placeholder="Ej: Marzo 2022"><p class="em" id="e-tjde">Requerido.</p></div>
+        <div class="fg"><label>Puesto actual <span class="rq">*</span></label><input type="text" id="tjp" placeholder="Ej: Vendedor"><p class="em" id="e-tjp">Requerido.</p></div>
+      </div>
+    </div>
+    <hr class="dv">
+    <p style="font-size:13px;color:var(--tm);margin-bottom:14px">Trabajos anteriores. Trabajo 1 obligatorio.</p>
+    <div class="jb"><p class="jt">Trabajo 1 <span class="tg tgr">Obligatorio</span></p>
+      <div class="fg"><label>&iquest;D&oacute;nde? <span class="rq">*</span></label><input type="text" id="t1d" placeholder="Nombre de la empresa"><p class="em" id="e-t1d">Requerido.</p></div>
+      <div class="row"><div class="fg"><label>Inicio <span class="rq">*</span></label><input type="text" id="t1i" placeholder="Ej: Enero 2019"><p class="em" id="e-t1i">Requerido.</p></div><div class="fg"><label>Egreso <span class="rq">*</span></label><input type="text" id="t1f" placeholder="Ej: Junio 2021"><p class="em" id="e-t1f">Requerido.</p></div></div>
+      <div class="fg"><label>Puesto <span class="rq">*</span></label><input type="text" id="t1p" placeholder="Ej: Operario"><p class="em" id="e-t1p">Requerido.</p></div>
+    </div>
+    <div class="jb"><p class="jt">Trabajo 2 <span class="tg tgo">Opcional</span></p>
+      <div class="fg"><label>&iquest;D&oacute;nde?</label><input type="text" id="t2d" placeholder="Nombre de la empresa"></div>
+      <div class="row"><div class="fg"><label>Inicio</label><input type="text" id="t2i" placeholder="Ej: 2017"></div><div class="fg"><label>Egreso</label><input type="text" id="t2f" placeholder="Ej: 2018"></div></div>
+      <div class="fg"><label>Puesto</label><input type="text" id="t2p" placeholder="Ej: Cajero"></div>
+    </div>
+    <div class="jb"><p class="jt">Trabajo 3 <span class="tg tgo">Opcional</span></p>
+      <div class="fg"><label>&iquest;D&oacute;nde?</label><input type="text" id="t3d" placeholder="Nombre de la empresa"></div>
+      <div class="row"><div class="fg"><label>Inicio</label><input type="text" id="t3i" placeholder="Ej: 2015"></div><div class="fg"><label>Egreso</label><input type="text" id="t3f" placeholder="Ej: 2017"></div></div>
+      <div class="fg"><label>Puesto</label><input type="text" id="t3p" placeholder="Ej: Mozo"></div>
+    </div>
+    <hr class="dv">
+    <p style="font-size:13px;color:var(--tm);margin-bottom:12px">Referencias <span class="op">(opcionales)</span></p>
+    <div class="jb"><p class="jt">Ref. Trabajo 1 <span class="tg tgo">Opcional</span></p><div class="row"><div class="fg"><label>Nombre</label><input type="text" id="r1n" placeholder="Juan P&eacute;rez"></div><div class="fg"><label>Puesto</label><input type="text" id="r1p" placeholder="Gerente"></div></div><div class="fg"><label>Tel&eacute;fono</label><input type="tel" id="r1t" placeholder="+54 351 0000000"></div></div>
+    <div class="jb"><p class="jt">Ref. Trabajo 2 <span class="tg tgo">Opcional</span></p><div class="row"><div class="fg"><label>Nombre</label><input type="text" id="r2n" placeholder="Laura Mart&iacute;nez"></div><div class="fg"><label>Puesto</label><input type="text" id="r2p" placeholder="Supervisora"></div></div><div class="fg"><label>Tel&eacute;fono</label><input type="tel" id="r2t" placeholder="+54 351 0000000"></div></div>
+    <div class="jb"><p class="jt">Ref. Trabajo 3 <span class="tg tgo">Opcional</span></p><div class="row"><div class="fg"><label>Nombre</label><input type="text" id="r3n" placeholder="Carlos Ruiz"></div><div class="fg"><label>Puesto</label><input type="text" id="r3p" placeholder="Due&ntilde;o"></div></div><div class="fg"><label>Tel&eacute;fono</label><input type="tel" id="r3t" placeholder="+54 351 0000000"></div></div>
+  </div>
+  <div class="nr"><button class="btn bs" onclick="goStep(1)">&larr; Anterior</button><button class="btn bp" onclick="goStep(3)">Siguiente &rarr; Educaci&oacute;n</button></div>
+</div>
+
+<!-- PASO 3 -->
+<div class="step" id="s3">
+  <div class="card">
+    <h2 class="ct"><span class="ic">&#x1F393;</span>Educaci&oacute;n e Idiomas</h2>
+    <p class="cs">Formaci&oacute;n acad&eacute;mica, cursos e idiomas</p>
+    <div class="fg">
+      <label>&iquest;Est&aacute;s estudiando actualmente? <span class="rq">*</span></label>
+      <div class="rg">
+        <div class="ro"><input type="radio" name="estudia" id="essi" value="si" onchange="toggleCB('essi','cest')"><label for="essi">S&iacute;</label></div>
+        <div class="ro"><input type="radio" name="estudia" id="esno" value="no" onchange="toggleCB('essi','cest')"><label for="esno">No</label></div>
+      </div>
+      <p class="em" id="e-est">Seleccion&aacute; una opci&oacute;n.</p>
+    </div>
+    <div class="cb" id="cest">
+      <div class="fg"><label>Instituci&oacute;n <span class="rq">*</span></label><input type="text" id="esinst" placeholder="UNC, UTN..."><p class="em" id="e-esinst">Requerido.</p></div>
+      <div class="fg"><label>&iquest;Qu&eacute; estudi&aacute;s? <span class="rq">*</span></label><input type="text" id="esq" placeholder="Ej: Lic. en Administraci&oacute;n"><p class="em" id="e-esq">Requerido.</p></div>
+    </div>
+    <hr class="dv">
+    <div class="fg"><label>Nivel educativo m&aacute;s alto <span class="rq">*</span></label><div class="sw"><select id="nived"><option value="">-- Seleccion&aacute; --</option><option>Primario incompleto</option><option>Primario completo</option><option>Secundario incompleto</option><option>Secundario completo</option><option>Terciario incompleto</option><option>Terciario completo</option><option>Universitario incompleto</option><option>Universitario completo</option><option>Posgrado / Maestr&iacute;a</option><option>Doctorado</option></select></div><p class="em" id="e-nived">Seleccion&aacute; el nivel.</p></div>
+    <hr class="dv">
+    <div class="jb"><p class="jt">&#x1F3EB; Escuela / Secundario</p>
+      <div class="fg"><label>Instituci&oacute;n <span class="rq">*</span></label><input type="text" id="esci" placeholder="Nombre del colegio"><p class="em" id="e-esci">Requerido.</p></div>
+      <div class="row"><div class="fg"><label>Fecha conclusi&oacute;n <span class="rq">*</span></label><input type="text" id="escf" placeholder="Ej: Diciembre 2018"><p class="em" id="e-escf">Requerido.</p></div><div class="fg"><label>Nivel concluido <span class="rq">*</span></label><input type="text" id="escn" placeholder="Ej: Secundario completo"><p class="em" id="e-escn">Requerido.</p></div></div>
+      <div class="fg"><label>Si era t&eacute;cnico: especialidad <span class="op">(opcional)</span></label><input type="text" id="esce" placeholder="Ej: Electr&oacute;nica"></div>
+    </div>
+    <div class="jb"><p class="jt">&#x1F393; Universitario / T&eacute;cnico</p>
+      <p style="font-size:12px;color:var(--tm);margin-bottom:9px">Si no ten&eacute;s, escrib&iacute; NO. <span class="rq">*</span></p>
+      <div class="fg"><textarea id="univtec" rows="3" placeholder="UNC -- Contador P&uacute;blico -- Incompleto -- 2015/2018"></textarea><p class="em" id="e-univtec">Complet&aacute; o escrib&iacute; NO.</p></div>
+    </div>
+    <div class="jb"><p class="jt">&#x1F4DA; Otras Formaciones</p>
+      <p style="font-size:12px;color:var(--tm);margin-bottom:9px">Cursos, talleres. Si no ten&eacute;s, escrib&iacute; NO. <span class="rq">*</span></p>
+      <div class="fg"><textarea id="otrasf" rows="3" placeholder="Excel Avanzado -- Instituto X -- 2021"></textarea><p class="em" id="e-otrasf">Complet&aacute; o escrib&iacute; NO.</p></div>
+    </div>
+    <div class="fg" style="margin-top:14px"><label>Idiomas <span class="rq">*</span></label><p style="font-size:12px;color:var(--tm);margin-bottom:6px">Si no ten&eacute;s, escrib&iacute; NO.</p><textarea id="idiomas" rows="2" placeholder="Ingl&eacute;s intermedio (B1)"></textarea><p class="em" id="e-idiomas">Complet&aacute; o escrib&iacute; NO.</p></div>
+  </div>
+  <div class="nr"><button class="btn bs" onclick="goStep(2)">&larr; Anterior</button><button class="btn bp" onclick="goStep(4)">Siguiente &rarr; Sobre Vos</button></div>
+</div>
+
+<!-- PASO 4 -->
+<div class="step" id="s4">
+  <div class="card">
+    <h2 class="ct"><span class="ic">&#x2728;</span>Sobre Vos</h2>
+    <p class="cs">Cont&aacute;nos qui&eacute;n sos y qu&eacute; te diferencia</p>
+    <div class="fg"><label>Perfil profesional / Objetivos <span class="rq">*</span></label><textarea id="obj" rows="3" placeholder="Tus metas y objetivos profesionales..."></textarea><p class="em" id="e-obj">Requerido.</p></div>
+    <div class="fg"><label>Mayores logros <span class="rq">*</span></label><textarea id="logros" rows="3" placeholder="Ej: Lider&eacute; un equipo de 5 personas..."></textarea><p class="em" id="e-logros">Requerido.</p></div>
+    <div class="fg"><label>&iquest;Cambio de sector? <span class="op">(opcional)</span></label><textarea id="sector" rows="2" placeholder="Si aplica, el motivo..."></textarea></div>
+    <div class="fg"><label>&iquest;Qu&eacute; busc&aacute;s en un trabajo? <span class="rq">*</span></label><textarea id="busca" rows="3" placeholder="Ambiente, crecimiento, aprendizaje..."></textarea><p class="em" id="e-busca">Requerido.</p></div>
+    <div class="fg"><label>Principales habilidades <span class="rq">*</span></label><textarea id="habs" rows="3" placeholder="Trabajo en equipo, Office, atenci&oacute;n al cliente..."></textarea><p class="em" id="e-habs">Requerido.</p></div>
+  </div>
+  <div class="nr"><button class="btn bs" onclick="goStep(3)">&larr; Anterior</button><button class="btn bsub" onclick="submitForm()">&#x1F4E8; Enviar formulario</button></div>
+</div>
+
+</main>
+<script>
+var EMAIL_CFG = {
+  publicKey:  'qGdr3kgJ2Gcu3L6Re',
+  serviceId:  'service_xmikhan',
+  templateId: 'template_sau21wh',
+  toEmail:    'paulag.freelancer08@gmail.com',
+  configured: true
+};
+emailjs.init(EMAIL_CFG.publicKey);
+
+var selTplId = 1;
+var TOTAL_STEPS = 4;
+var TPL_DESCS = [
+  "Cl&aacute;sico y elegante. Encabezado gris con nombre destacado. Secciones separadas por l&iacute;neas divisorias con etiquetas a la izquierda.",
+  "Sidebar negro moderno con foto circular. Datos de contacto y perfil a la izquierda, experiencia y educaci&oacute;n a la derecha.",
+  "Columna lateral gris con esquina redondeada y foto circular. Secciones con c&aacute;psulas color salmón en el área principal.",
+  "Foto cuadrada en encabezado bicolor. Resumen completo arriba y dos columnas para educaci&oacute;n y experiencia.",
+  "Diseño limpio y minimalista. Foto circular arriba izquierda, presentación breve y dos columnas bien organizadas.",
+  "Estilo acad&eacute;mico con fondo beige cálido. Sidebar oscuro con foto cuadrada, t&iacute;tulos en may&uacute;sculas y tipograf&iacute;a elegante.",
+];
+var TPL_SVGS = [
+  "<svg viewBox=\"0 0 100 140\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"140\" fill=\"white\"/><rect width=\"100\" height=\"22\" fill=\"#f0f0f0\"/><rect x=\"6\" y=\"6\" width=\"35\" height=\"4\" fill=\"#222\" rx=\"1\"/><rect x=\"6\" y=\"13\" width=\"22\" height=\"2.5\" fill=\"#aaa\" rx=\"1\"/><rect x=\"62\" y=\"6\" width=\"28\" height=\"2\" fill=\"#bbb\" rx=\"1\"/><rect x=\"62\" y=\"10\" width=\"28\" height=\"2\" fill=\"#bbb\" rx=\"1\"/><rect x=\"62\" y=\"14\" width=\"28\" height=\"2\" fill=\"#bbb\" rx=\"1\"/><line x1=\"0\" y1=\"24\" x2=\"100\" y2=\"24\" stroke=\"#ddd\" stroke-width=\"0.5\"/><rect x=\"6\" y=\"30\" width=\"16\" height=\"2.5\" fill=\"#222\" rx=\"1\"/><line x1=\"27\" y1=\"27\" x2=\"27\" y2=\"100\" stroke=\"#ccc\" stroke-width=\"0.5\"/><rect x=\"30\" y=\"30\" width=\"60\" height=\"2\" fill=\"#ccc\" rx=\"1\"/><rect x=\"30\" y=\"34\" width=\"55\" height=\"2\" fill=\"#ccc\" rx=\"1\"/><rect x=\"30\" y=\"38\" width=\"50\" height=\"2\" fill=\"#ccc\" rx=\"1\"/><rect x=\"6\" y=\"48\" width=\"16\" height=\"2.5\" fill=\"#222\" rx=\"1\"/><rect x=\"30\" y=\"48\" width=\"30\" height=\"2\" fill=\"#ccc\" rx=\"1\"/><rect x=\"30\" y=\"52\" width=\"25\" height=\"2\" fill=\"#ccc\" rx=\"1\"/><rect x=\"30\" y=\"56\" width=\"28\" height=\"2\" fill=\"#ccc\" rx=\"1\"/><rect x=\"6\" y=\"66\" width=\"18\" height=\"2.5\" fill=\"#222\" rx=\"1\"/><rect x=\"30\" y=\"66\" width=\"40\" height=\"2.5\" fill=\"#333\" rx=\"1\"/><rect x=\"30\" y=\"71\" width=\"25\" height=\"2\" fill=\"#aaa\" rx=\"1\"/><rect x=\"30\" y=\"79\" width=\"38\" height=\"2.5\" fill=\"#333\" rx=\"1\"/><rect x=\"30\" y=\"84\" width=\"25\" height=\"2\" fill=\"#aaa\" rx=\"1\"/><rect x=\"6\" y=\"96\" width=\"18\" height=\"2.5\" fill=\"#222\" rx=\"1\"/><rect x=\"30\" y=\"96\" width=\"35\" height=\"2.5\" fill=\"#333\" rx=\"1\"/><rect x=\"30\" y=\"101\" width=\"28\" height=\"2\" fill=\"#aaa\" rx=\"1\"/></svg>",
+  "<svg viewBox=\"0 0 100 140\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"140\" fill=\"white\"/><rect width=\"38\" height=\"140\" fill=\"#222\"/><circle cx=\"19\" cy=\"18\" r=\"12\" fill=\"#555\"/><rect x=\"5\" y=\"34\" width=\"28\" height=\"2\" fill=\"#777\" rx=\"1\"/><rect x=\"5\" y=\"38\" width=\"22\" height=\"1.5\" fill=\"#999\" rx=\"1\"/><rect x=\"5\" y=\"42\" width=\"25\" height=\"1.5\" fill=\"#999\" rx=\"1\"/><rect x=\"5\" y=\"49\" width=\"15\" height=\"2\" fill=\"#888\" rx=\"1\"/><rect x=\"5\" y=\"53\" width=\"26\" height=\"1.5\" fill=\"#777\" rx=\"1\"/><rect x=\"5\" y=\"57\" width=\"22\" height=\"1.5\" fill=\"#777\" rx=\"1\"/><rect x=\"44\" y=\"8\" width=\"48\" height=\"5\" fill=\"#333\" rx=\"1\"/><rect x=\"44\" y=\"15\" width=\"30\" height=\"2.5\" fill=\"#bbb\" rx=\"1\"/><line x1=\"44\" y1=\"22\" x2=\"95\" y2=\"22\" stroke=\"#ccc\" stroke-width=\"0.5\"/><rect x=\"44\" y=\"26\" width=\"30\" height=\"2.5\" fill=\"#444\" rx=\"1\"/><rect x=\"44\" y=\"31\" width=\"48\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"44\" y=\"35\" width=\"40\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"44\" y=\"41\" width=\"48\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"44\" y=\"45\" width=\"36\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"44\" y=\"53\" width=\"30\" height=\"2.5\" fill=\"#444\" rx=\"1\"/><rect x=\"44\" y=\"58\" width=\"48\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"44\" y=\"62\" width=\"40\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/></svg>",
+  "<svg viewBox=\"0 0 100 140\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"140\" fill=\"white\"/><rect width=\"36\" height=\"118\" fill=\"#ddd\"/><ellipse cx=\"18\" cy=\"118\" rx=\"18\" ry=\"8\" fill=\"#ddd\"/><circle cx=\"18\" cy=\"16\" r=\"12\" fill=\"#bbb\"/><rect x=\"5\" y=\"32\" width=\"26\" height=\"2\" fill=\"#888\" rx=\"1\"/><rect x=\"5\" y=\"36\" width=\"22\" height=\"1.5\" fill=\"#aaa\" rx=\"1\"/><rect x=\"5\" y=\"50\" width=\"18\" height=\"2\" fill=\"#888\" rx=\"1\"/><rect x=\"5\" y=\"54\" width=\"24\" height=\"1.5\" fill=\"#aaa\" rx=\"1\"/><rect x=\"5\" y=\"58\" width=\"20\" height=\"1.5\" fill=\"#aaa\" rx=\"1\"/><rect x=\"40\" y=\"8\" width=\"52\" height=\"7\" fill=\"#333\" rx=\"1\"/><rect x=\"40\" y=\"17\" width=\"35\" height=\"2.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"40\" y=\"24\" width=\"52\" height=\"5\" rx=\"2.5\" fill=\"#ffd0c0\"/><rect x=\"42\" y=\"33\" width=\"48\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"42\" y=\"37\" width=\"40\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"40\" y=\"44\" width=\"52\" height=\"5\" rx=\"2.5\" fill=\"#ffd0c0\"/><rect x=\"42\" y=\"53\" width=\"40\" height=\"2.5\" fill=\"#555\" rx=\"1\"/><rect x=\"42\" y=\"57\" width=\"48\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"40\" y=\"65\" width=\"52\" height=\"5\" rx=\"2.5\" fill=\"#ffd0c0\"/><rect x=\"42\" y=\"74\" width=\"35\" height=\"2\" fill=\"#555\" rx=\"1\"/><rect x=\"42\" y=\"78\" width=\"28\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/></svg>",
+  "<svg viewBox=\"0 0 100 140\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"140\" fill=\"white\"/><rect width=\"100\" height=\"30\" fill=\"#eee\"/><rect x=\"6\" y=\"5\" width=\"20\" height=\"20\" fill=\"#bbb\"/><rect x=\"30\" y=\"8\" width=\"40\" height=\"5\" fill=\"#333\" rx=\"1\"/><rect x=\"30\" y=\"15\" width=\"28\" height=\"2.5\" fill=\"#aaa\" rx=\"1\"/><rect x=\"6\" y=\"34\" width=\"22\" height=\"2\" fill=\"#333\" rx=\"1\"/><line x1=\"6\" y1=\"37\" x2=\"94\" y2=\"37\" stroke=\"#ccc\" stroke-width=\"0.5\"/><rect x=\"6\" y=\"40\" width=\"70\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"6\" y=\"44\" width=\"60\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"6\" y=\"50\" width=\"20\" height=\"2\" fill=\"#333\" rx=\"1\"/><line x1=\"6\" y1=\"53\" x2=\"44\" y2=\"53\" stroke=\"#ccc\" stroke-width=\"0.4\"/><rect x=\"6\" y=\"56\" width=\"35\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"6\" y=\"60\" width=\"30\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"6\" y=\"68\" width=\"18\" height=\"2\" fill=\"#333\" rx=\"1\"/><line x1=\"6\" y1=\"71\" x2=\"44\" y2=\"71\" stroke=\"#ccc\" stroke-width=\"0.4\"/><rect x=\"6\" y=\"74\" width=\"32\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"50\" y=\"50\" width=\"40\" height=\"2\" fill=\"#333\" rx=\"1\"/><line x1=\"50\" y1=\"53\" x2=\"94\" y2=\"53\" stroke=\"#ccc\" stroke-width=\"0.4\"/><rect x=\"50\" y=\"56\" width=\"35\" height=\"2\" fill=\"#555\" rx=\"1\"/><rect x=\"50\" y=\"60\" width=\"40\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"50\" y=\"70\" width=\"35\" height=\"2\" fill=\"#555\" rx=\"1\"/><rect x=\"50\" y=\"74\" width=\"40\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/></svg>",
+  "<svg viewBox=\"0 0 100 140\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"140\" fill=\"white\"/><circle cx=\"18\" cy=\"18\" r=\"13\" fill=\"#ddd\"/><rect x=\"36\" y=\"8\" width=\"55\" height=\"6\" fill=\"#333\" rx=\"1\"/><rect x=\"36\" y=\"16\" width=\"40\" height=\"2.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"36\" y=\"21\" width=\"50\" height=\"1.5\" fill=\"#ddd\" rx=\"1\"/><rect x=\"36\" y=\"25\" width=\"45\" height=\"1.5\" fill=\"#ddd\" rx=\"1\"/><line x1=\"6\" y1=\"37\" x2=\"94\" y2=\"37\" stroke=\"#ccc\" stroke-width=\"0.5\"/><rect x=\"6\" y=\"42\" width=\"12\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><line x1=\"6\" y1=\"45\" x2=\"40\" y2=\"45\" stroke=\"#ddd\" stroke-width=\"0.3\"/><rect x=\"6\" y=\"48\" width=\"32\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"6\" y=\"52\" width=\"28\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"6\" y=\"59\" width=\"12\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><line x1=\"6\" y1=\"62\" x2=\"40\" y2=\"62\" stroke=\"#ddd\" stroke-width=\"0.3\"/><rect x=\"6\" y=\"65\" width=\"30\" height=\"1.5\" fill=\"#ccc\" rx=\"1\"/><rect x=\"48\" y=\"42\" width=\"42\" height=\"2.5\" fill=\"#333\" rx=\"1\"/><line x1=\"48\" y1=\"46\" x2=\"94\" y2=\"46\" stroke=\"#ccc\" stroke-width=\"0.4\"/><rect x=\"48\" y=\"49\" width=\"38\" height=\"2\" fill=\"#555\" rx=\"1\"/><rect x=\"48\" y=\"53\" width=\"30\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"48\" y=\"61\" width=\"38\" height=\"2\" fill=\"#555\" rx=\"1\"/><rect x=\"48\" y=\"65\" width=\"30\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"48\" y=\"73\" width=\"38\" height=\"2\" fill=\"#555\" rx=\"1\"/><rect x=\"48\" y=\"77\" width=\"30\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/></svg>",
+  "<svg viewBox=\"0 0 100 140\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"140\" fill=\"#faf8f4\"/><rect width=\"38\" height=\"140\" fill=\"#221f1a\"/><rect x=\"5\" y=\"6\" width=\"28\" height=\"28\" fill=\"#555\"/><rect x=\"5\" y=\"40\" width=\"28\" height=\"2\" fill=\"#998\" rx=\"1\"/><rect x=\"5\" y=\"44\" width=\"24\" height=\"1.5\" fill=\"#776\" rx=\"1\"/><rect x=\"5\" y=\"48\" width=\"20\" height=\"1.5\" fill=\"#776\" rx=\"1\"/><rect x=\"5\" y=\"55\" width=\"22\" height=\"2\" fill=\"#998\" rx=\"1\"/><rect x=\"5\" y=\"59\" width=\"26\" height=\"1.5\" fill=\"#776\" rx=\"1\"/><rect x=\"5\" y=\"63\" width=\"24\" height=\"1.5\" fill=\"#776\" rx=\"1\"/><rect x=\"44\" y=\"8\" width=\"50\" height=\"7\" fill=\"#333\" rx=\"1\"/><rect x=\"44\" y=\"17\" width=\"35\" height=\"2.5\" fill=\"#888\" rx=\"1\"/><rect x=\"44\" y=\"27\" width=\"38\" height=\"2\" fill=\"#555\" rx=\"1\"/><line x1=\"44\" y1=\"30\" x2=\"94\" y2=\"30\" stroke=\"#bbb\" stroke-width=\"0.4\"/><rect x=\"44\" y=\"33\" width=\"48\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"44\" y=\"37\" width=\"40\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"44\" y=\"44\" width=\"38\" height=\"2\" fill=\"#555\" rx=\"1\"/><line x1=\"44\" y1=\"47\" x2=\"94\" y2=\"47\" stroke=\"#bbb\" stroke-width=\"0.4\"/><rect x=\"44\" y=\"50\" width=\"35\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"44\" y=\"54\" width=\"28\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/><rect x=\"44\" y=\"62\" width=\"38\" height=\"2\" fill=\"#555\" rx=\"1\"/><line x1=\"44\" y1=\"65\" x2=\"94\" y2=\"65\" stroke=\"#bbb\" stroke-width=\"0.4\"/><rect x=\"44\" y=\"68\" width=\"30\" height=\"1.5\" fill=\"#bbb\" rx=\"1\"/></svg>",
+];
+
+// Template selection
+(function() {
+  for (var i = 1; i <= 6; i++) {
+    (function(n) {
+      var btn = document.getElementById('tb' + n);
+      if (btn) {
+        btn.addEventListener('click', function() {
+          selTplId = n;
+          for (var j = 1; j <= 6; j++) {
+            var b = document.getElementById('tb' + j);
+            if (b) {
+              if (j === n) b.classList.add('sel');
+              else b.classList.remove('sel');
+            }
+          }
+        });
+      }
+    })(i);
+  }
+})();
+
+// Preview modal
+function openPrev(n) {
+  document.getElementById('prevTitle').textContent = 'Modelo ' + n;
+  document.getElementById('prevSvg').innerHTML = TPL_SVGS[n-1];
+  document.getElementById('prevSvg').querySelector('svg').setAttribute('viewBox','0 0 100 140');
+  document.getElementById('prevSvg').querySelector('svg').style.width = '100%';
+  document.getElementById('prevSvg').querySelector('svg').style.height = 'auto';
+  document.getElementById('prevDesc').innerHTML = TPL_DESCS[n-1];
+  var selBtn = document.getElementById('prevSelBtn');
+  selBtn.onclick = function() {
+    selTplId = n;
+    for (var j = 1; j <= 6; j++) {
+      var b = document.getElementById('tb' + j);
+      if (b) {
+        if (j === n) b.classList.add('sel');
+        else b.classList.remove('sel');
+      }
+    }
+    closePrev();
+  };
+  document.getElementById('prevOv').classList.add('show');
+}
+function closePrev() {
+  document.getElementById('prevOv').classList.remove('show');
+}
+document.getElementById('prevOv').addEventListener('click', function(e) {
+  if (e.target === this) closePrev();
+});
+
+// Progress percentage
+function updateProgress(step) {
+  var pct = Math.round((step / TOTAL_STEPS) * 100);
+  document.getElementById('pctFill').style.width = pct + '%';
+  document.getElementById('pctTxt').textContent = pct + '%';
+}
+
+// Navigation
+function goStep(n) {
+  var cur = curStep();
+  if (n > cur && !validate(cur)) return;
+  for (var i = 0; i <= 4; i++) {
+    var s = document.getElementById('s' + i);
+    if (s) s.classList.remove('act');
+    var p = document.getElementById('pg' + i);
+    if (p) {
+      p.classList.remove('act','dn');
+      if (i < n) p.classList.add('dn');
+      if (i === n) p.classList.add('act');
+    }
+  }
+  var ns = document.getElementById('s' + n);
+  if (ns) ns.classList.add('act');
+  updateProgress(n);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function curStep() {
+  for (var i = 0; i <= 4; i++) {
+    var s = document.getElementById('s' + i);
+    if (s && s.classList.contains('act')) return i;
+  }
+  return 0;
+}
+
+function toggleCB(tid, bid) {
+  var checked = document.getElementById(tid).checked;
+  var b = document.getElementById(bid);
+  if (checked) { b.classList.add('show'); }
+  else {
+    b.classList.remove('show');
+    b.querySelectorAll('input,textarea').forEach(function(x){x.classList.remove('er');});
+    b.querySelectorAll('.em').forEach(function(x){x.classList.remove('show');});
+  }
+}
+
+var photoDataURL = null;
+function handlePhoto(inp) {
+  var f = inp.files[0];
+  if (!f) return;
+  if (f.size > 10*1024*1024) { alert('La foto supera 10 MB.'); return; }
+  document.getElementById('fotonm').textContent = f.name;
+  document.getElementById('e-foto').classList.remove('show');
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var c = document.createElement('canvas'); c.width = c.height = 300;
+      var ctx = c.getContext('2d');
+      ctx.beginPath(); ctx.arc(150,150,150,0,Math.PI*2); ctx.closePath(); ctx.clip();
+      var ms = Math.min(img.width,img.height);
+      ctx.drawImage(img,(img.width-ms)/2,(img.height-ms)/2,ms,ms,0,0,300,300);
+      photoDataURL = c.toDataURL('image/jpeg',0.92);
+      var w = document.getElementById('pwrap');
+      w.innerHTML = '<img src="' + photoDataURL + '" alt="Foto">';
+      w.classList.add('hp');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+function v(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function rv(name) { var e = document.querySelector('input[name="'+name+'"]:checked'); return e ? e.value : ''; }
+function se(id, show) {
+  var f = document.getElementById(id);
+  var m = document.getElementById('e-'+id);
+  if (f) { if(show) f.classList.add('er'); else f.classList.remove('er'); }
+  if (m) { if(show) m.classList.add('show'); else m.classList.remove('show'); }
+}
+function sem(id, show) {
+  var m = document.getElementById(id);
+  if (m) { if(show) m.classList.add('show'); else m.classList.remove('show'); }
+}
+
+function validate(step) {
+  var ok = true;
+  if (step === 1) {
+    if (!v('nombre')) { se('nombre',true); ok=false; } else se('nombre',false);
+    var em = v('email');
+    if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { se('email',true); ok=false; } else se('email',false);
+    if (!v('tel')) { se('tel',true); ok=false; } else se('tel',false);
+    if (!v('dir')) { se('dir',true); ok=false; } else se('dir',false);
+    if (!v('puestos')) { se('puestos',true); ok=false; } else se('puestos',false);
+    if (!photoDataURL) { sem('e-foto',true); ok=false; } else sem('e-foto',false);
+  }
+  if (step === 2) {
+    var tr = rv('trabaja');
+    if (!tr) { sem('e-trab',true); ok=false; } else sem('e-trab',false);
+    if (tr === 'si') {
+      if (!v('tjd')) { se('tjd',true); ok=false; } else se('tjd',false);
+      if (!v('tjde')) { se('tjde',true); ok=false; } else se('tjde',false);
+      if (!v('tjp')) { se('tjp',true); ok=false; } else se('tjp',false);
+    }
+    var req = ['t1d','t1i','t1f','t1p'];
+    for (var i=0;i<req.length;i++) {
+      if (!v(req[i])) { se(req[i],true); ok=false; } else se(req[i],false);
+    }
+  }
+  if (step === 3) {
+    var es = rv('estudia');
+    if (!es) { sem('e-est',true); ok=false; } else sem('e-est',false);
+    if (es === 'si') {
+      if (!v('esinst')) { se('esinst',true); ok=false; } else se('esinst',false);
+      if (!v('esq')) { se('esq',true); ok=false; } else se('esq',false);
+    }
+    if (!v('nived')) { se('nived',true); ok=false; } else se('nived',false);
+    if (!v('esci')) { se('esci',true); ok=false; } else se('esci',false);
+    if (!v('escf')) { se('escf',true); ok=false; } else se('escf',false);
+    if (!v('escn')) { se('escn',true); ok=false; } else se('escn',false);
+    if (!v('univtec')) { se('univtec',true); ok=false; } else se('univtec',false);
+    if (!v('otrasf')) { se('otrasf',true); ok=false; } else se('otrasf',false);
+    if (!v('idiomas')) { se('idiomas',true); ok=false; } else se('idiomas',false);
+  }
+  if (step === 4) {
+    if (!v('obj')) { se('obj',true); ok=false; } else se('obj',false);
+    if (!v('logros')) { se('logros',true); ok=false; } else se('logros',false);
+    if (!v('busca')) { se('busca',true); ok=false; } else se('busca',false);
+    if (!v('habs')) { se('habs',true); ok=false; } else se('habs',false);
+  }
+  if (!ok) {
+    var fe = document.querySelector('.er,.em.show');
+    if (fe) fe.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  return ok;
+}
+
+function collectData() {
+  var tr = rv('trabaja'), es = rv('estudia');
+  return {
+    tpl:selTplId, nombre:v('nombre'), email:v('email'), tel:v('tel'), dir:v('dir'),
+    puestos:v('puestos'), ocup:v('ocup'), disponib:v('disponib'), linkedin:v('linkedin'),
+    photoDataURL:photoDataURL, trabaja:tr, tjD:v('tjd'), tjDe:v('tjde'), tjP:v('tjp'),
+    t1d:v('t1d'),t1i:v('t1i'),t1f:v('t1f'),t1p:v('t1p'),
+    t2d:v('t2d'),t2i:v('t2i'),t2f:v('t2f'),t2p:v('t2p'),
+    t3d:v('t3d'),t3i:v('t3i'),t3f:v('t3f'),t3p:v('t3p'),
+    r1n:v('r1n'),r1p:v('r1p'),r1t:v('r1t'),
+    r2n:v('r2n'),r2p:v('r2p'),r2t:v('r2t'),
+    r3n:v('r3n'),r3p:v('r3p'),r3t:v('r3t'),
+    estudia:es, estInst:v('esinst'), estQue:v('esq'),
+    nivelEd:v('nived'), escInst:v('esci'), escFin:v('escf'),
+    escNiv:v('escn'), escEsp:v('esce'),
+    univTec:v('univtec'), otrasF:v('otrasf'), idiomas:v('idiomas'),
+    obj:v('obj'), logros:v('logros'), sector:v('sector'),
+    busca:v('busca'), habs:v('habs')
+  };
+}
+
+function buildText(d) {
+  var fecha = new Date().toLocaleString('es-AR');
+  var L = [];
+  L.push('NUEVO CV RECIBIDO - ' + fecha);
+  L.push('Modelo de CV elegido: Modelo ' + d.tpl);
+  L.push('');
+  L.push('=== DATOS PERSONALES ===');
+  L.push('Nombre: ' + d.nombre);
+  L.push('Email: ' + d.email);
+  L.push('Telefono: ' + d.tel);
+  L.push('Direccion: ' + d.dir);
+  L.push('Puestos de interes: ' + d.puestos);
+  if (d.ocup) L.push('Ocupacion: ' + d.ocup);
+  if (d.disponib) L.push('Disponibilidad: ' + d.disponib);
+  if (d.linkedin) L.push('LinkedIn: ' + d.linkedin);
+  L.push('');
+  L.push('=== EXPERIENCIA ===');
+  L.push('Trabaja actualmente: ' + (d.trabaja === 'si' ? 'Si' : 'No'));
+  if (d.trabaja === 'si') {
+    L.push('Empresa actual: ' + d.tjD);
+    L.push('Desde: ' + d.tjDe);
+    L.push('Puesto: ' + d.tjP);
+  }
+  if (d.t1d) L.push('Trabajo 1: ' + d.t1d + ' | ' + d.t1i + ' a ' + d.t1f + ' | ' + d.t1p);
+  if (d.t2d) L.push('Trabajo 2: ' + d.t2d + ' | ' + d.t2i + ' a ' + d.t2f + ' | ' + d.t2p);
+  if (d.t3d) L.push('Trabajo 3: ' + d.t3d + ' | ' + d.t3i + ' a ' + d.t3f + ' | ' + d.t3p);
+  if (d.r1n) L.push('Ref 1: ' + d.r1n + ' | ' + d.r1p + ' | ' + d.r1t);
+  if (d.r2n) L.push('Ref 2: ' + d.r2n + ' | ' + d.r2p + ' | ' + d.r2t);
+  if (d.r3n) L.push('Ref 3: ' + d.r3n + ' | ' + d.r3p + ' | ' + d.r3t);
+  L.push('');
+  L.push('=== EDUCACION ===');
+  L.push('Estudia actualmente: ' + (d.estudia === 'si' ? 'Si - ' + d.estQue + ' (' + d.estInst + ')' : 'No'));
+  L.push('Nivel educativo: ' + d.nivelEd);
+  L.push('Escuela: ' + d.escInst + ' - ' + d.escNiv + ' - ' + d.escFin);
+  if (d.escEsp) L.push('Especialidad: ' + d.escEsp);
+  L.push('Universitario/Tecnico: ' + d.univTec);
+  L.push('Otras formaciones: ' + d.otrasF);
+  L.push('Idiomas: ' + d.idiomas);
+  L.push('');
+  L.push('=== PERFIL ===');
+  L.push('Objetivos: ' + d.obj);
+  L.push('Logros: ' + d.logros);
+  if (d.sector) L.push('Cambio de sector: ' + d.sector);
+  L.push('Que busca: ' + d.busca);
+  L.push('Habilidades: ' + d.habs);
+  return L.join('\n');
+}
+
+function submitForm() {
+  if (!validate(4)) return;
+  var lov = document.getElementById('lov');
+  lov.classList.add('show');
+  document.getElementById('ltxt').textContent = 'Enviando...';
+  var d = collectData();
+  emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, {
+    name: d.nombre,
+    email: d.email,
+    time: new Date().toLocaleString('es-AR'),
+    title: 'Nuevo CV: ' + d.nombre + ' | Modelo ' + d.tpl + (d.disponib ? ' | ' + d.disponib : ''),
+    message: buildText(d)
+  }).then(function() {
+    lov.classList.remove('show');
+    document.getElementById('mok').classList.add('show');
+  }, function(err) {
+    lov.classList.remove('show');
+    document.getElementById('errtxt').textContent = 'Error: ' + JSON.stringify(err);
+    document.getElementById('merr').classList.add('show');
+  });
+}
+
+function closeM(id) {
+  document.getElementById(id).classList.remove('show');
+}
+</script>
+</body>
+</html>
